@@ -31,7 +31,11 @@ checkAndCreateAdmin();
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    origin: [
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "https://34.135.114.112:3000",
+    ],
     exposedHeaders: "Authorization",
     methods: ["GET", "PUT", "POST", "DELETE"],
   })
@@ -43,9 +47,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "10mb" }))
 
 
-// setInterval(() => {
-//   AuthController.refreshToken();
-// }, 60000); //300000
+setInterval(() => {
+  AuthController.refreshToken();
+}, 300000); //300000
 
 app.listen(process.env.PORT, () => {
     console.log(`Server running on http://localhost:${process.env.PORT}`);
