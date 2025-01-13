@@ -32,7 +32,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "http://127.0.0.1:3000",
-      "https://34.135.114.112:3000",
+      "http://34.135.114.112:3000",
     ],
     exposedHeaders: "Authorization",
     methods: ["GET", "PUT", "POST", "DELETE"],
