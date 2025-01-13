@@ -47,7 +47,7 @@ app.use(express.json({ limit: "10mb" }))
 
 setInterval(() => {
   UserController.refreshToken();
-}, 30000); //300000
+}, 300000); //300000
 
 app.listen(process.env.PORT, () => {
     console.log(`Server running on http://localhost:${process.env.PORT}`);
