@@ -1,4 +1,4 @@
-@token= eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NmVhNDMxZTU5MmM2ZTkzNmNhYjA0NyIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczNTMwOTQyNywiZXhwIjoxNzM1NjU1MDI3fQ.5tVke90D5JDtb2IjfV_UFwyxx6bH95nX82vO07NTWSI
+@token= eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NmVhNDMxZTU5MmM2ZTkzNmNhYjA0NyIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczNjczMzUwNiwiZXhwIjoxNzM3MDc5MTA2fQ.W24hil8ZP_i_utCQ_nvP2LpGYa7nHhDQpCMudH8pXww
 
 ### Login Admin
 POST http://localhost:5003/login
@@ -98,6 +98,11 @@ Content-Type: application/json
 
 ### get medical record by patient
 get http://localhost:5003/rekam-medis/patient/67709ff8af01a878c5f17e61
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### get medical record by patient
+get http://localhost:5003/rekam-medis/6770e1b455da3e9fce1b6713
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
