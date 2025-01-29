@@ -21,6 +21,7 @@ export default function RekamMedis() {
   const params = useLocation();
   const [hapusRekamMedis, setHapusRekamMedis] = useState(false);
   const [dataRekamMedis, setDataRekamMedis] = useState("");
+  const [dataRekamMedisDecrypt, setDataRekamMedisDecrypt] = useState("");
   const [dataServiceRekamMedis, setDataServiceRekamMedis] = useState("");
   const [fullnameDetailRM, setFullnameDetailRM] = useState("");
   const [dataDetailRekamMedis, setDataDetailRekamMedis] = useState("");
@@ -72,7 +73,13 @@ export default function RekamMedis() {
           "",
           currentPage
         );
+        const responseDecrypt = await Api.GetRekamMedisDecrypt(
+          localStorage.getItem("token"),
+          "",
+          currentPage
+        );
         setDataRekamMedis(response.data.data);
+        setDataRekamMedisDecrypt(responseDecrypt.data.data);
         setCurrentPage(parseInt(response.data.currentPages, 10));
         setTotalPages(response.data.totalPages);
         setDataServiceRekamMedis(response.data.data.service);
@@ -81,9 +88,13 @@ export default function RekamMedis() {
           localStorage.getItem("token"),
           params.state.idPasien
         );
-        // console.log(response.data.data[0].fullname);
+        const responseDecrypt = await Api.GetRekamMedisByPatientDecrypt(
+          localStorage.getItem("token"),
+          params.state.idPasien
+        );
         setDataRekamMedis(response.data.data);
-        setFullnameDetailRM(response.data.data[0].fullname);
+        setDataRekamMedisDecrypt(responseDecrypt.data.data);
+        setFullnameDetailRM(responseDecrypt.data.data[0].fullname);
         // setDataServiceRekamMedis(response.data.data.service);
       }
     } catch (error) {
@@ -290,7 +301,11 @@ export default function RekamMedis() {
                 </h1>
                 <h1 className="col-span-3">
                   Date:{" "}
-                  {dataDetailRekamMedis.date ? dataDetailRekamMedis.date : "-"}
+                  {dataDetailRekamMedis.createdAt
+                    ? moment(dataDetailRekamMedis.createdAt).format(
+                        "DD MMMM YYYY"
+                      )
+                    : "-"}
                 </h1>
                 <hr className="border-1" />
               </div>
@@ -323,8 +338,8 @@ export default function RekamMedis() {
                   </h1>
                   <h1>
                     :{" "}
-                    {dataDetailRekamMedis.hasil
-                      ? dataDetailRekamMedis.hasil //formatServiceNames(dataDetailRekamMedis.service)
+                    {dataDetailRekamMedis.service
+                      ? dataDetailRekamMedis.service //formatServiceNames(dataDetailRekamMedis.service)
                       : "-"}
                   </h1>
                 </div>
@@ -401,12 +416,17 @@ export default function RekamMedis() {
         <div className="flex w-full">
           <Sidebar />
           <div className="w-full p-10">
-            <div className="border-2 bg-white rounded-lg p-10 space-y-[20px]">
-              <h1 className="text-2xl text-slate-black font-medium mb-[40px]">
-                Medical Records{" "}
-                {fullnameDetailRM ? fullnameDetailRM : "All Patient"}
-              </h1>
-
+            <div className="border-2 bg-white rounded-lg p-10 mb-6 space-y-[20px]">
+              <div className="mb-[40px]">
+                <h1 className="text-2xl text-slate-black font-medium">
+                  List Decrypt Medical Records{" "}
+                  {fullnameDetailRM ? fullnameDetailRM : "All Patient"}
+                </h1>
+                <p className="text-medium text-[#737373] mt-2">
+                  This is a data display retrieved from the database that has
+                  been decrypted using SGKMS
+                </p>
+              </div>
               {params.state === null ? (
                 <div className="flex items-center justify-between gap-2">
                   <button
@@ -424,13 +444,6 @@ export default function RekamMedis() {
                       className="h-[38px] text-[#A8A8A8] text-[10px] font-[500] pl-12 border rounded-[12px] py-2 w-full lg:w-[300px]"
                     />
                   </div>
-                  {/* <button
-                    onClick={exportToExcel}
-                    className="flex items-center justify-center gap-2 border-2  px-3 py-2 rounded-md shadow-sm font-semibold"
-                  >
-                    <FaFileExport className="text-blue-700 font-extrabold" />
-                    <h1 className="text-sm">Export Data</h1>
-                  </button> */}
                 </div>
               ) : (
                 <button
@@ -444,127 +457,90 @@ export default function RekamMedis() {
                   New Medical Record
                 </button>
               )}
-              <table className="w-full space-y-[10px]">
-                <div className="flex items-center gap-3 bg-white px-[14px] py-[10px] rounded-[3px]">
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">No.</h1>
-                  </div>
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">Date</h1>
-                  </div>
-                  {params.state === null && (
-                    <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                      <h1 className="text-black text-xs font-semibold">Name</h1>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">
-                      Diagnosis
-                    </h1>
-                  </div>
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">
-                      Therapy
-                    </h1>
-                  </div>
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">
-                      Service
-                    </h1>
-                  </div>
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">
-                      Description
-                    </h1>
-                  </div>
-                  <div className=" w-full flex items-center justify-center ">
-                    <h1 className="text-black text-xs text-center font-semibold">
-                      Action
-                    </h1>
-                  </div>
-                </div>
-                {Object.values(dataRekamMedis).map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-3 bg-white px-[14px] py-[8px] rounded-[3px] border-t"
-                  >
-                    <div className="min-w-[150px] max-w-[150px]">
-                      <h1 className="text-[#737373] text-xs font-[600]">
-                        {item ? idx + 1 : "-"}
-                      </h1>
-                    </div>
-                    <div className="min-w-[150px] max-w-[150px]">
-                      <h1 className="text-[#737373] text-xs font-[600] line-clamp-1">
-                        {item ? item.date : "-"}
-                      </h1>
-                    </div>
-                    {params.state === null && (
-                      <div className="min-w-[150px] max-w-[150px]">
-                        <h1 className="text-[#737373] text-xs font-[600] line-clamp-1">
-                          {item ? item.fullname : "-"}
-                        </h1>
-                      </div>
-                    )}
-                    <div className="min-w-[150px] max-w-[150px]">
-                      <h1 className="text-[#737373] text-xs font-[600] line-clamp-1">
-                        {item ? item.diagnosis : "-"}
-                      </h1>
-                    </div>
-                    <div className="min-w-[150px] max-w-[150px]">
-                      <h1 className="text-[#737373] text-xs font-[600] line-clamp-1">
-                        {item ? item.therapy : "-"}
-                      </h1>
-                    </div>
-                    <div className="min-w-[150px] max-w-[150px]">
-                      {params.state === null ? (
-                        <h1 className="text-[#737373] text-xs font-[600] line-clamp-1">
-                          {item ? item.hasil : "-"}
-                        </h1>
-                      ) : (
-                        <h1 className="text-[#737373] text-xs font-[600] line-clamp-1">
-                          {/* {formatServiceNames(item.service)} */}
-                          {item ? item.service : "-"}
-                        </h1>
-                      )}
-                    </div>
-                    <div className="min-w-[150px] max-w-[150px]">
-                      <h1 className="text-[#737373] text-xs font-[600] line-clamp-1">
-                        {item ? item.description : "-"}
-                      </h1>
-                    </div>
-                    <div className="w-full space-x-2 flex items-center justify-center">
-                      <button
-                        onClick={() => actionInsertKey(item.id)}
-                        className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
-                      >
-                        {" "}
-                        Detail
-                      </button>
-                      <button
-                        // onClick={() => actionDeleteRekamMedis(item.id)}
-                        onClick={() => actionDeleteRekamMedis(item.id)}
-                        className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
-                      >
-                        Remove
-                      </button>
-                      {/* <button
-                        onClick={() => openDetailRekamMedis(item.id)}
-                        className="w-[50px] text-xs p-2 font-medium bg-slate-600 text-white rounded-[9px]"
-                      >
-                        {" "}
-                        Detail{" "}
-                      </button>
-                      <button
-                        onClick={() => actionDeleteRekamMedis(item.id)}
-                        className="w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
-                      >
-                        Hapus
-                      </button> */}
-                    </div>
-                  </div>
-                ))}
-              </table>
-              {params.state === null && (
+              <div className="overflow-auto scrollbar-hide bg-white">
+                <table className="w-full table-auto border-collapse">
+                  <thead>
+                    <tr className="">
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        No.
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Date
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Patient Code
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Diagnosis
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Therapy
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Service
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Description
+                      </th>
+                      <th className="px-4 py-2 text-center text-xs font-semibold text-black">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+
+                  {/* Table Body */}
+                  <tbody>
+                    {Object.values(dataRekamMedisDecrypt).map((item, idx) => (
+                      <tr key={idx} className="border-t hover:bg-gray-100">
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {idx + 1}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {moment(item.createdAt).format("DD MMMM YYYY")}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate max-w-[200px]">
+                          {item.numberRegristation}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate max-w-[200px]">
+                          {item.diagnosis}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate max-w-[200px]">
+                          {item.therapy}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate max-w-[200px]">
+                          {item.service}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate max-w-[200px]">
+                          {item.description}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          <div className="w-full space-x-2 flex items-center justify-center">
+                            <button
+                              onClick={() => openDetailRekamMedis(item.id)}
+                              className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
+                            >
+                              {" "}
+                              Detail
+                            </button>
+                            {/* <button
+                              onClick={() =>
+                                navigate("update", {
+                                  state: { idPasien: item.id },
+                                })
+                              }
+                              className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
+                            >
+                              {" "}
+                              Update
+                            </button> */}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* {params.state === null && (
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -572,7 +548,87 @@ export default function RekamMedis() {
                   onPrevChange={handlePrevChange}
                   onNextChange={handleNextChange}
                 />
-              )}
+              )} */}
+            </div>
+            {/* batas Decrypt */}
+            <div className="border-2 bg-white rounded-lg p-10 space-y-[20px]">
+              <div className="mb-[40px]">
+                <h1 className="text-2xl text-slate-black font-medium">
+                  List Encrypt Medical Records{" "}
+                  {fullnameDetailRM ? fullnameDetailRM : "All Patient"}
+                </h1>
+                <p className="text-medium text-[#737373] mt-2">
+                  This is a data display retrieved from the database that has
+                  been encrypted using SGKMS
+                </p>
+              </div>
+              <div className="overflow-auto scrollbar-hide bg-white">
+                <table className="w-full table-auto border-collapse">
+                  <thead>
+                    <tr className="">
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        No.
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Date
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Patient Code
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Diagnosis
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Therapy
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Service
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Description
+                      </th>
+                    </tr>
+                  </thead>
+
+                  {/* Table Body */}
+                  <tbody>
+                    {Object.values(dataRekamMedis).map((item, idx) => (
+                      <tr key={idx} className="border-t hover:bg-gray-100">
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {idx + 1}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {moment(item.createdAt).format("DD MMMM YYYY")}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.numberRegristation}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate max-w-[200px]">
+                          {item.diagnosis}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate max-w-[200px]">
+                          {item.therapy}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate max-w-[200px]">
+                          {item.service}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate max-w-[200px]">
+                          {item.description}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* {params.state === null && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  onPrevChange={handlePrevChange}
+                  onNextChange={handleNextChange}
+                />
+              )} */}
             </div>
           </div>
         </div>

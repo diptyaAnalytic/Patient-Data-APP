@@ -18,10 +18,11 @@ export default function Pasien() {
   const [totalPages, setTotalPages] = useState("");
   const [pasienId, setPasienId] = useState("");
   const [dataPasien, setDataPasien] = useState("");
+  const [dataPasienDecrypt, setDataPasienDecrypt] = useState("");
   const [dataDetailPasien, setDataDetailPasien] = useState("");
   const [refresh, setRefresh] = useState(false);
   const role = "dokter";
-
+  
   const getPasien = async () => {
     try {
       const response = await Api.GetPasien(
@@ -29,7 +30,13 @@ export default function Pasien() {
         "",
         currentPage
       );
+      const responseDecrypt = await Api.GetPasienDecrypt(
+        localStorage.getItem("token"),
+        "",
+        currentPage
+      );
       setDataPasien(response.data.data);
+      setDataPasienDecrypt(responseDecrypt.data.data);
       setTotalPages(response.data.totalPages);
       setCurrentPage(parseInt(response.data.currentPages, 10));
       console.log(response);
@@ -37,7 +44,6 @@ export default function Pasien() {
       console.log(error);
     }
   };
-  console.log(dataPasien);
   const handleSearchName = (e) => {
     const searchName = e.target.value;
     debouncedSearchName(searchName);
@@ -144,7 +150,9 @@ export default function Pasien() {
                   <h1>: {dataDetailPasien ? dataDetailPasien.gender : "-"}</h1>
                   <h1>
                     : {dataDetailPasien ? dataDetailPasien.placeBirth : "-"},{" "}
-                    { `${new Date(dataDetailPasien.dateBirth).toLocaleDateString('en-GB')}`}
+                    {`${new Date(dataDetailPasien.dateBirth).toLocaleDateString(
+                      "en-GB"
+                    )}`}
                   </h1>
                   <h1>: {dataDetailPasien ? dataDetailPasien.address : "-"}</h1>
                   <h1>: {dataDetailPasien ? dataDetailPasien.work : "-"}</h1>
@@ -164,10 +172,16 @@ export default function Pasien() {
         <div className="flex w-full">
           <Sidebar />
           <div className="w-full p-10">
-            <div className="border-2 bg-white rounded-lg p-10 space-y-[20px]">
-              <h1 className="text-2xl text-slate-black font-medium mb-[40px]">
-                Patient
-              </h1>
+            <div className="border-2 bg-white rounded-lg mb-6 p-10 space-y-[20px]">
+              <div className="mb-[40px]">
+                <h1 className="text-2xl text-slate-black font-medium">
+                  List Decrypt Patient
+                </h1>
+                <p className="text-medium text-[#737373] mt-2">
+                  This is a data display retrieved from the database that has
+                  been decrypted using SGKMS
+                </p>
+              </div>
               <div className="flex items-center justify-between">
                 <Link
                   to={"create"}
@@ -184,128 +198,244 @@ export default function Pasien() {
                   />
                 </div>
               </div>
-              <table className="w-full space-y-[10px]">
-                <div className="flex items-center gap-3 bg-white px-[14px] py-[10px] rounded-[3px]">
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">
-                      Patient Code
-                    </h1>
-                  </div>
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">Name</h1>
-                  </div>
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">Gender</h1>
-                  </div>
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">work</h1>
-                  </div>
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">Phone</h1>
-                  </div>
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">
-                      Place of Birth
-                    </h1>
-                  </div>
-                  <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                    <h1 className="text-black text-xs font-semibold">
-                      Date of Birth
-                    </h1>
-                  </div>
-                  <div className=" w-full flex items-center justify-center">
-                    <h1 className="text-black text-xs text-center font-semibold">
-                      Action
-                    </h1>
-                  </div>
-                </div>
-                {Object.values(dataPasien).map((item, idx) => (
-                  <div className="flex items-center gap-3 bg-white px-[14px] py-[8px] rounded-[3px] border-t">
-                    <div className="min-w-[150px] max-w-[150px]">
-                      <h1 className="text-[#737373] text-xs font-[600] line-clamp-1">
-                        {item.numberRegristation}
-                      </h1>
-                    </div>
-                    <div className="min-w-[150px] max-w-[150px]">
-                      {role === "dokter" ? (
-                        <button
-                          onClick={() =>
-                            navigate("/rekam-medis", {
-                              state: {
-                                idPasien: item.id,
-                                namaPasien: item.fullname,
-                              },
-                            })
-                          }
-                          className="text-[#0B63F8] text-xs font-[600] line-clamp-1 underline hover:text-blue-700"
-                        >
+              <div className="overflow-auto scrollbar-hide bg-white">
+                <table className="w-full table-auto border-collapse">
+                  <thead>
+                    <tr className="">
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        No.
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Patient Code
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Fullname
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Gender
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Marital Status
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Religion
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Citizenship
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Mother
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Work
+                      </th>
+                      <th className="px-4 py-2 text-center text-xs font-semibold text-black">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+
+                  {/* Table Body */}
+                  <tbody>
+                    {Object.values(dataPasien).map((item, idx) => (
+                      <tr key={idx} className="border-t hover:bg-gray-100">
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {idx + 1}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.numberRegristation}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          <button
+                            onClick={() =>
+                              navigate("/rekam-medis", {
+                                state: {
+                                  idPasien: item.id,
+                                  namaPasien: item.fullname,
+                                },
+                              })
+                            }
+                            className="text-[#0B63F8] hover:underline hover:text-blue-700"
+                          >
+                            {item.fullname}
+                          </button>
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.gender}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.maritalStatus}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.religion}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.citizenship}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {/* {moment(item.dateBirth).format("DD MMMM YYYY")} */}
+                          {item.mother}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.work}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          <div className="w-full space-x-2 flex items-center justify-center">
+                            <button
+                              onClick={() => openDetailPasien(item.id)}
+                              className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
+                            >
+                              {" "}
+                              Detail
+                            </button>
+                            <button
+                              onClick={() =>
+                                navigate("update", {
+                                  state: { idPasien: item.id },
+                                })
+                              }
+                              className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
+                            >
+                              {" "}
+                              Update
+                            </button>
+                            <button
+                              onClick={() => actionHapusPasien(item.id)}
+                              className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* <div className="flex justify-end mr-12">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  onPrevChange={handlePrevChange}
+                  onNextChange={handleNextChange}
+                />
+              </div> */}
+            </div>
+            {/* Page Decrypt */}
+            <div className="border-2 bg-white rounded-lg p-10 space-y-[20px]">
+              <div className="mb-[40px]">
+                <p className="text-2xl text-slate-black font-medium">
+                  List Encrypt Patient
+                </p>
+                <p className="text-medium text-[#737373] mt-2">
+                  This is a data display retrieved from the database that has
+                  been encrypted using SGKMS
+                </p>
+              </div>
+              <div className="overflow-auto scrollbar-hide bg-white">
+                <table className="w-full table-auto border-collapse">
+                  <thead>
+                    <tr className="">
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        No.
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Patient Code
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Fullname
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Gender
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Marital Status
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Religion
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Citizenship
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Mother
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Work
+                      </th>
+                      {/* <th className="px-4 py-2 text-center text-xs font-semibold text-black">
+                        Medical Records
+                      </th> */}
+                    </tr>
+                  </thead>
+
+                  {/* Table Body */}
+                  <tbody>
+                    {Object.values(dataPasienDecrypt).map((item, idx) => (
+                      <tr key={idx} className="border-t hover:bg-gray-100">
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {idx + 1}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.numberRegristation}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {/* {moment(item.date).format("DD MMMM YYYY")} */}
                           {item.fullname}
-                        </button>
-                      ) : (
-                        <h1 className="text-[#0B63F8] text-xs font-[600]">
-                          {item.fullname}
-                        </h1>
-                      )}
-                    </div>
-                    <div className="min-w-[150px] max-w-[150px]">
-                      <h1 className="text-[#737373] text-xs font-[600] line-clamp-1">
-                        {item.gender}
-                      </h1>
-                    </div>
-                    <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                      <h1 className="text-[#737373]  text-xs font-semibold line">
-                        {item.work}
-                      </h1>
-                    </div>
-                    <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                      <h1 className="text-[#737373]  text-xs font-semibold line">
-                        {item.phone}
-                      </h1>
-                    </div>
-                    <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                      <h1 className="text-[#737373]  text-xs font-semibold line">
-                        {item.placeBirth}
-                      </h1>
-                    </div>
-                    <div className="flex items-center gap-[15px] min-w-[150px] max-w-[150px]">
-                      <h1 className="text-[#737373]  text-xs font-semibold line">
-                        {moment(item.date_birth).format("DD MMMM YYYY")}
-                      </h1>
-                    </div>
-                    <div className="w-full space-x-2 flex items-center justify-center">
-                      <button
-                        onClick={() => openDetailPasien(item.id)}
-                        className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
-                      >
-                        {" "}
-                        Detail
-                      </button>
-                      <button
-                        onClick={() =>
-                          navigate("update", { state: { idPasien: item.id } })
-                        }
-                        className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
-                      >
-                        {" "}
-                        Update
-                      </button>
-                      <button
-                        onClick={() => actionHapusPasien(item.id)}
-                        className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </table>
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-                onPrevChange={handlePrevChange}
-                onNextChange={handleNextChange}
-              />
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.gender}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.maritalStatus}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.religion}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.citizenship}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {/* {moment(item.dateBirth).format("DD MMMM YYYY")} */}
+                          {item.mother}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.work}
+                        </td>
+                        {/* <td className="px-4 py-2 text-center">
+                          <div className="w-full space-x-2 flex items-center justify-center">
+                            <button
+                              onClick={() => openDetailPasien(item.id)}
+                              className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
+                            >
+                              {" "}
+                              Detail
+                            </button>
+                            <button
+                              onClick={() =>
+                                navigate("update", {
+                                  state: { idPasien: item.id },
+                                })
+                              }
+                              className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
+                            >
+                              {" "}
+                              Update
+                            </button>
+                            <button
+                              onClick={() => actionHapusPasien(item.id)}
+                              className="flex items-center justify-center w-[50px] text-xs p-2 font-medium bg-slate-600 rounded-[9px] text-white"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </td> */}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

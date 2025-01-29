@@ -10,7 +10,11 @@ export default function CreatePasien() {
   // create state
   const [tanggal, setTanggal] = useState();
   const [nama, setNama] = useState();
-  const [jenisKelamin, setJenisKelamin] = useState();
+  const [maritalStatus, setMaritalStatus] = useState();
+  const [citizenship, setCitizenship] = useState();
+  const [gender, setGender] = useState();
+  const [religion, setReligion] = useState();
+  const [mother, setMother] = useState();
   const [tempatLahir, setTempatLahir] = useState();
   const [tanggalLahir, setTanggalLahir] = useState();
   const [alamat, setAlamat] = useState();
@@ -22,9 +26,13 @@ export default function CreatePasien() {
     try {
       const data = {
         fullname: nama,
+        maritalStatus,
+        citizenship,
+        religion,
+        mother,
+        gender,
         placeBirth: tempatLahir,
         dateBirth: tanggalLahir,
-        gender: jenisKelamin,
         address: alamat,
         work: pekerjaan,
         phone: String(telepon),
@@ -52,24 +60,13 @@ export default function CreatePasien() {
                 Create Patient
               </h1>
               <div className="text-sm space-y-2">
-                <h1 className="font-medium">Name</h1>
+                <h1 className="font-medium">Fullname</h1>
                 <input
                   onChange={(e) => setNama(e.target.value)}
                   type="text"
                   className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
-                  placeholder="Name...."
+                  placeholder="Input Fullname Patient...."
                 />
-              </div>
-              <div className="text-sm space-y-2">
-                <h1 className="font-medium">Gender</h1>
-                <select
-                  onChange={(e) => setJenisKelamin(e.target.value)}
-                  className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
-                >
-                  <option value="">Select gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
               </div>
               <div className="text-sm space-y-2">
                 <h1 className="font-medium">Place of Birth</h1>
@@ -88,6 +85,54 @@ export default function CreatePasien() {
                   />
                 </div>
               </div>
+              <div className="text-sm space-y-2">
+                <h1 className="font-medium">Gender</h1>
+                <select
+                  onChange={(e) => setGender(e.target.value)}
+                  className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
+                >
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+              <div className="text-sm space-y-2">
+                <h1 className="font-medium">Marital Status</h1>
+                <input
+                  onChange={(e) => setMaritalStatus(e.target.value)}
+                  type="text"
+                  className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
+                  placeholder="Input Marital Status...."
+                />
+              </div>
+              <div className="text-sm space-y-2">
+                <h1 className="font-medium">Citizenship</h1>
+                <input
+                  onChange={(e) => setCitizenship(e.target.value)}
+                  type="text"
+                  className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
+                  placeholder="Input Citizenship...."
+                />
+              </div>
+              <div className="text-sm space-y-2">
+                <h1 className="font-medium">Religion</h1>
+                <input
+                  onChange={(e) => setReligion(e.target.value)}
+                  type="text"
+                  className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
+                  placeholder="Input Religion...."
+                />
+              </div>
+              <div className="text-sm space-y-2">
+                <h1 className="font-medium">Mother</h1>
+                <input
+                  onChange={(e) => setMother(e.target.value)}
+                  type="text"
+                  className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
+                  placeholder="Input Name Mother...."
+                />
+              </div>
+
               <div className="text-sm space-y-2">
                 <h1 className="font-medium">Address</h1>
                 <input

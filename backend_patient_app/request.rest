@@ -1,4 +1,4 @@
-@token= eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NmVhNDMxZTU5MmM2ZTkzNmNhYjA0NyIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczNjczMzUwNiwiZXhwIjoxNzM3MDc5MTA2fQ.W24hil8ZP_i_utCQ_nvP2LpGYa7nHhDQpCMudH8pXww
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NmVhNDMxZTU5MmM2ZTkzNmNhYjA0NyIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczNzg2MTcwNCwiZXhwIjoxNzM4MjA3MzA0fQ.6rEaIjB7XNqql8ao83OdPC8XFtqyOiXnb0Tsrw0t9Rs
 
 ### Login Admin
 POST http://localhost:5003/login
@@ -36,43 +36,55 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "fullname": "diptya", 
-  "placeBirth": "banyumas", 
-  "dateBirth": "1/5/2001", 
-  "gender": "male", 
-  "address": "Sokaraja", 
-  "work": "oke", 
-  "phone": "012345678986"
-}
-
-
-### Menampilkan data pasien
-GET http://localhost:5003/patient
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-### Menampilkan detail pasien
-GET http://localhost:5003/patient/677085a5d003a665296772a8
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-### Update patient
-PUT http://localhost:5003/patient/677085a5d003a665296772a8
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
   "fullname": "bagus", 
   "placeBirth": "banyumas", 
   "dateBirth": "1/5/2001", 
   "gender": "male", 
   "address": "Sokaraja", 
   "work": "oke", 
-  "phone": "012345678986"
+  "phone": "01234567898",
+  "mother": "bagus",
+  "citizenship": "WNI",
+  "religion": "Islam",
+  "maritalStatus": "belum kawin"
+}
+
+### Menampilkan data pasien
+GET http://localhost:5003/patient
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Menampilkan data pasien Encrypt
+GET http://localhost:5003/encrypt/patient
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Menampilkan detail pasien
+GET http://localhost:5003/patient/6793447bd33d2ac1584f88be
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Update patient
+PUT http://localhost:5003/patient/6793447bd33d2ac1584f88be
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fullname": "sumantry", 
+  "placeBirth": "banyumas", 
+  "dateBirth": "1/5/2001", 
+  "gender": "male", 
+  "address": "Sokaraja", 
+  "work": "oke", 
+  "phone": "012345678988",
+  "mother": "bagus",
+  "citizenship": "WNI",
+  "religion": "Islam",
+  "maritalStatus": "belum kawin"
 }
 
 ### hapus pasien
-delete http://localhost:5003/patient/677085a5d003a665296772a8
+delete http://localhost:5003/patient/67934d44061280baa2363c87
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -88,7 +100,7 @@ Content-Type: application/json
   "therapy": "oke", 
   "service": "oke", 
   "description": "oke", 
-  "patientId": "67709ff8af01a878c5f17e61"
+  "patientId": "6793447bd33d2ac1584f88be"
 }
 
 ### get medical record
@@ -97,34 +109,21 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 ### get medical record by patient
-get http://localhost:5003/rekam-medis/patient/67709ff8af01a878c5f17e61
+get http://localhost:5003/rekam-medis/patient/6793447bd33d2ac1584f88be
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
-### get medical record by patient
-get http://localhost:5003/rekam-medis/6770e1b455da3e9fce1b6713
+### get medical record by patient Decrypt
+get http://localhost:5003/decrypt/rekam-medis/patient/6793447bd33d2ac1584f88be
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
-
-
-
-
-
-
-###
-### Menambah order saja untuk user tertentu
-POST http://localhost:5003/orders
+### get medical detail
+get http://localhost:5003/rekam-medis/6795b8c370ac834ba2c56624
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
-{
-    "userId": "676a8cab9e0646e86b0ce689",
-    "item": "Laptop",
-    "price": 1000
-}
-
-###
-
-### Menampilkan order berdasarkan user tertentu
-GET http://localhost:5003/users/676a8cab9e0646e86b0ce689/orders
+### get medical record Decrypt
+get http://localhost:5003/decrypt/rekam-medis
+Authorization: Bearer {{token}}
 Content-Type: application/json

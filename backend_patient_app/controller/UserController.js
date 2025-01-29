@@ -1,9 +1,31 @@
 const jwt = require("jsonwebtoken");
 
 const { User } = require("../models");
-const {SGKMS}  = require("../utils");
+const { SGKMS } = require("../utils");
 const { responseGet, responseError } = require("../helper/Response");
-const { accessToken } = require('../helper/AccessToken')
+const { accessToken } = require("../helper/AccessToken");
+
+const redis = require("redis");
+
+// Buat client Redis
+const client = redis.createClient({
+  socket: {
+    host: "127.0.0.1", // Ganti dengan IP Redis jika tidak di localhost
+    port: 6379,
+  },
+});
+
+// Event handler untuk koneksi
+client.on("connect", () => {
+  console.log("Connected to Redis");
+});
+
+client.on("error", (err) => {
+  console.error("Redis error:", err);
+});
+
+// Koneksikan client Redis
+client.connect();
 
 class UserController {
   static async login(req, res) {
@@ -17,14 +39,32 @@ class UserController {
           message: !user ? "Username not found!" : "Invalid password!!",
         });
       }
+      const login = await SGKMS.engineApiSGKMS(
+        `/${process.env.VERSION}/agent/login`,
+        {
+          slotId: parseInt(process.env.SLOT_ID),
+          password: process.env.PASSWORD_SGKMS,
+        }
+      );
+      // console.log(login)
+      if (!login.result.sessionToken) {
+        return responseError(res, { message: "login sgkms failed!" });
+      }
+      process.env.SESSION_TOKEN = login.result.sessionToken;
+      await client.set("session_token", `${login.result.sessionToken}`);
+
+      const sessionToken = await client.get("session_token");
+      console.log("sessionToken dari Redis:", sessionToken);
+      // console.log(process.env.SESSION_TOKEN);
       const randomNumbers = await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/rng`,
         {
-          sessionToken: process.env.SESSION_TOKEN,
+          sessionToken: login.result.sessionToken,
           slotId: parseInt(process.env.SLOT_ID),
-          length: 2,
+          length: parseInt(process.env.LENGTH_RNG),
         }
       );
+
       if (!randomNumbers)
         return responseError(res, { message: "engine sgkms error" });
       await User.findOneAndUpdate(
@@ -82,11 +122,11 @@ class UserController {
           slotId: parseInt(process.env.SLOT_ID),
         }
       ).then((data) => {
-        console.log("masuk", data.result.sessionToken);
+        console.log("masuk", data);
         process.env.SESSION_TOKEN = data.result.sessionToken;
       });
     } catch (error) {
-      console.log("error refresh token");
+      console.log("error refresh token", error);
     }
   }
 }

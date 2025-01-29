@@ -17,6 +17,7 @@ router.get("/header", verifyToken, PatientController.headerAmount);
 
 router.post('/patient', validatePatient ,verifyToken, PatientController.createPatient);
 router.get('/patient', verifyToken, PatientController.getPatient);
+router.get('/encrypt/patient', verifyToken, PatientController.getPatientEncrypt);
 router.get('/patient/:id', verifyToken, PatientController.detailPatient);
 router.put('/patient/:id', validatePatient, verifyToken, PatientController.updatePatient);
 router.delete('/patient/:id', verifyToken, PatientController.deletePatient);
@@ -24,7 +25,9 @@ router.delete('/patient/:id', verifyToken, PatientController.deletePatient);
 
 router.post('/rekam-medis',verifyToken, MedicalRecordController.creteMedicalRecord);
 router.get("/rekam-medis", verifyToken, MedicalRecordController.getRM);
+router.get("/decrypt/rekam-medis", verifyToken, MedicalRecordController.getRMDecrypt);
 router.get("/rekam-medis/patient/:id", verifyToken, MedicalRecordController.getDetailbyPatient);
+router.get("/decrypt/rekam-medis/patient/:id", verifyToken, MedicalRecordController.getDetailbyPatientDecrypt);
 router.get("/rekam-medis/:id", verifyToken, MedicalRecordController.getDetailRM);
 router.delete( "/rekam-medis/:id", verifyToken, MedicalRecordController.deleteRekamMedis);
 

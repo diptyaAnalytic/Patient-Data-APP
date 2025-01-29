@@ -10,7 +10,11 @@ export default function UpdatePasien() {
   // create state
   const [tanggal, setTanggal] = useState();
   const [nama, setNama] = useState();
-  const [jenisKelamin, setJenisKelamin] = useState();
+  const [maritalStatus, setMaritalStatus] = useState();
+  const [citizenship, setCitizenship] = useState();
+  const [gender, setGender] = useState();
+  const [religion, setReligion] = useState();
+  const [mother, setMother] = useState();
   const [tempatLahir, setTempatLahir] = useState();
   const [tanggalLahir, setTanggalLahir] = useState();
   const [alamat, setAlamat] = useState();
@@ -27,9 +31,15 @@ export default function UpdatePasien() {
       );
       // console.log(response.data.data.gender)
       setNama(response.data.data.fullname);
-      setJenisKelamin(response.data.data.gender);
+      setMaritalStatus(response.data.data.maritalStatus);
+      setCitizenship(response.data.data.citizenship);
+      setGender(response.data.data.gender);
+      setReligion(response.data.data.religion);
+      setMother(response.data.data.mother);
       setTempatLahir(response.data.data.placeBirth);
-      setTanggalLahir(new Date(response.data.data.dateBirth).toISOString().split("T")[0]);
+      setTanggalLahir(
+        new Date(response.data.data.dateBirth).toISOString().split("T")[0]
+      );
       setAlamat(response.data.data.address);
       setPekerjaan(response.data.data.work);
       setTelepon(response.data.data.phone);
@@ -39,15 +49,19 @@ export default function UpdatePasien() {
       console.log(error);
     }
   };
-  
+
   const updatePasien = async () => {
     try {
       const data = {
         numberRegristation: noRM,
         fullname: nama,
+        maritalStatus,
+        citizenship,
+        religion,
+        mother,
         placeBirth: tempatLahir,
         dateBirth: tanggalLahir,
-        gender: jenisKelamin,
+        gender,
         address: alamat,
         work: pekerjaan,
         phone: String(telepon),
@@ -87,7 +101,7 @@ export default function UpdatePasien() {
                 Update Patient
               </h1>
               <div className="text-sm space-y-2">
-                <h1 className="font-medium">Name</h1>
+                <h1 className="font-medium">Fullname</h1>
                 <input
                   value={nama}
                   onChange={(e) => setNama(e.target.value)}
@@ -95,18 +109,6 @@ export default function UpdatePasien() {
                   className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
                   placeholder="Nama Pasien...."
                 />
-              </div>
-              <div className="text-sm space-y-2">
-                <h1 className="font-medium">Gender</h1>
-                <select
-                  onChange={(e) => setJenisKelamin(e.target.value)}
-                  value={jenisKelamin}
-                  className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
-                >
-                  <option value="">Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
               </div>
               <div className="text-sm space-y-2">
                 <h1 className="font-medium">Place of Birth</h1>
@@ -126,6 +128,58 @@ export default function UpdatePasien() {
                     placeholder="Date of Birth...."
                   />
                 </div>
+              </div>
+              <div className="text-sm space-y-2">
+                <h1 className="font-medium">Gender</h1>
+                <select
+                  onChange={(e) => setGender(e.target.value)}
+                  value={gender}
+                  className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+              <div className="text-sm space-y-2">
+                <h1 className="font-medium">Marital Status</h1>
+                <input
+                  value={maritalStatus}
+                  onChange={(e) => setMaritalStatus(e.target.value)}
+                  type="text"
+                  className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
+                  placeholder="Input Marital Status...."
+                />
+              </div>
+              <div className="text-sm space-y-2">
+                <h1 className="font-medium">Citizenship</h1>
+                <input
+                  value={citizenship}
+                  onChange={(e) => setCitizenship(e.target.value)}
+                  type="text"
+                  className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
+                  placeholder="Input Citizenship...."
+                />
+              </div>
+              <div className="text-sm space-y-2">
+                <h1 className="font-medium">Religion</h1>
+                <input
+                  value={religion}
+                  onChange={(e) => setReligion(e.target.value)}
+                  type="text"
+                  className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
+                  placeholder="Input Religion...."
+                />
+              </div>
+              <div className="text-sm space-y-2">
+                <h1 className="font-medium">Mother</h1>
+                <input
+                  value={mother}
+                  onChange={(e) => setMother(e.target.value)}
+                  type="text"
+                  className="w-full border outline-none shadow-md px-2 py-2 rounded-md"
+                  placeholder="Input Mother...."
+                />
               </div>
               <div className="text-sm space-y-2">
                 <h1 className="font-medium">Address</h1>

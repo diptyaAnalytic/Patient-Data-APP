@@ -70,6 +70,15 @@ class Api {
       },
     });
   }
+  static GetPasienDecrypt(token, keyword, page) {
+    let path = `encrypt/patient?search=${keyword}&page=${page}`;
+    return request(`${this.urlAPI()}${path}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
   static GetPasienById(token, id) {
     let path = `patient/${id}`;
     return request(`${this.urlAPI()}${path}`, {
@@ -122,8 +131,26 @@ class Api {
       },
     });
   }
+  static GetRekamMedisByPatientDecrypt(token, id) {
+    let path = `decrypt/rekam-medis/patient/${id}`;
+    return request(`${this.urlAPI()}${path}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
   static GetRekamMedis(token, keyword, page) {
     let path = `rekam-medis?search=${keyword}&page=${page}`;
+    return request(`${this.urlAPI()}${path}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+  static GetRekamMedisDecrypt(token, keyword, page) {
+    let path = `decrypt/rekam-medis?search=${keyword}&page=${page}`;
     return request(`${this.urlAPI()}${path}`, {
       method: "GET",
       headers: {

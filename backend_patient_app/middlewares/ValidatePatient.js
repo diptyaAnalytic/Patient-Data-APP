@@ -10,6 +10,18 @@ const patientSchema = Joi.object({
     placeBirth: Joi.string().required().messages({
         'string.empty': 'Place of birth is required'
     }),
+    mother: Joi.string().required().messages({
+        'string.empty': 'Mother is required'
+    }),
+    citizenship: Joi.string().required().messages({
+        'string.empty': 'Citizenship is required'
+    }),
+    religion: Joi.string().required().messages({
+        'string.empty': 'Religion is required'
+    }),
+    maritalStatus: Joi.string().required().messages({
+        'string.empty': 'Marital Status is required'
+    }),
     dateBirth: Joi.date().required().messages({
         'date.base': 'Date of birth must be a valid date',
     }),

@@ -1,119 +1,219 @@
-const { responseGet, responseError, responseCreate, responseUpdate, responseDelete } = require('../helper/Response');
-const { Patient, MedicalRecord, User }= require('../models')
-const { SGKMS } = require('../utils')
+const {
+  responseGet,
+  responseError,
+  responseCreate,
+  responseUpdate,
+  responseDelete,
+} = require("../helper/Response");
+const { Patient, MedicalRecord, User } = require("../models");
+const { SGKMS } = require("../utils");
 
 class PatientController {
   static async headerAmount(req, res) {
     try {
-        const [amountPatient, amountMedicalRecord] = await Promise.all([
-            Patient.countDocuments(),
-            MedicalRecord.countDocuments(),
-        ]);
+      const [amountPatient, amountMedicalRecord] = await Promise.all([
+        Patient.countDocuments(),
+        MedicalRecord.countDocuments(),
+      ]);
 
-        return responseGet(res, {amountPatient, amountMedicalRecord})
+      return responseGet(res, { amountPatient, amountMedicalRecord });
     } catch (error) {
-      responseError(res, error)
+      responseError(res, error);
     }
   }
   static async createPatient(req, res) {
     try {
-      const { fullname, placeBirth, dateBirth, gender, address, work, phone, numberRegristation = Date.now() } = req.body; 
+      const {
+        fullname,
+        maritalStatus,
+        citizenship,
+        gender,
+        religion,
+        mother,
+        placeBirth,
+        dateBirth,
+        address,
+        work,
+        phone,
+        numberRegristation = Date.now(),
+      } = req.body;
       //use encrypt aes, so need aad or more data to encrypt data to encrypt
-      const processEncrypt = await SGKMS.engineApiSGKMS(`/${process.env.VERSION}/encrypt`,{
-        sessionToken: process.env.SESSION_TOKEN,
-        slotId: parseInt(process.env.SLOT_ID),
-        keyId: process.env.ENCRYPT_AES,
-        plaintext: [{
-          text: fullname,
-          numberRegristation,
-        }]
-      })
+      const processEncrypt = await SGKMS.engineApiSGKMS(
+        `/${process.env.VERSION}/encrypt`,
+        {
+          sessionToken: process.env.SESSION_TOKEN,
+          slotId: parseInt(process.env.SLOT_ID),
+          keyId: process.env.ENCRYPT_AES,
+          plaintext: [
+            {
+              text: fullname,
+              numberRegristation,
+            },
+            {
+              text: maritalStatus,
+              numberRegristation,
+            },
+            {
+              text: citizenship,
+              numberRegristation,
+            },
+            {
+              text: gender,
+              numberRegristation,
+            },
+            {
+              text: religion,
+              numberRegristation,
+            },
+            {
+              text: mother,
+              numberRegristation,
+            },
+          ],
+        }
+      );
       const user = new Patient({
         keyVersion: processEncrypt.result.keyVersion,
-        fullname: processEncrypt.result.ciphertext[0].text, 
-        mac: processEncrypt.result.ciphertext[0].mac,
-        iv: processEncrypt.result.ciphertext[0].iv,
-        dateBirth, 
-        address, 
-        phone, 
-        placeBirth, 
-        gender, 
-        work, 
-        numberRegristation 
-      })
-      await user.save()
+        fullname: processEncrypt.result.ciphertext[0],
+        maritalStatus: processEncrypt.result.ciphertext[1],
+        citizenship: processEncrypt.result.ciphertext[2],
+        gender: processEncrypt.result.ciphertext[3],
+        religion: processEncrypt.result.ciphertext[4],
+        mother: processEncrypt.result.ciphertext[5],
+        dateBirth,
+        address,
+        phone,
+        placeBirth,
+        work,
+        numberRegristation,
+      });
+      await user.save();
       responseCreate(res);
     } catch (error) {
-        responseError(res, error)
+      console.log(error);
+      responseError(res, error);
     }
   }
   static async getPatient(req, res) {
     try {
-      const data = await Patient.aggregate([{
-        $project: {
-          id: "$_id",
-          numberRegristation: 1,
-          text: "$fullname",
-          mac: 1,
-          iv: 1,
-          keyVersion: 1,
-          placeBirth: 1,
-          dateBirth: 1,
-          gender: 1,
-          address: 1,
-          work: 1,
-          phone: 1,
-          _id: 0
-        }
-      }]);
-      const processDecrypt = await SGKMS.engineApiSGKMS(
-        `/${process.env.VERSION}/decrypt`,{
-          sessionToken: process.env.SESSION_TOKEN,
-          slotId: parseInt(process.env.SLOT_ID),
-          keyId: process.env.ENCRYPT_AES,
-          keyVersion: data[0].keyVersion,
-          ciphertext: data,
-        }
-      );    
-      const dataDecrypt = data.map((dataEncrypt, x) => {
-        const { mac, iv, text, keyVersion, ...newData } = dataEncrypt;
-        return {
-          fullname: processDecrypt.result.plaintext[x],
-          ...newData,
-        };
-      });
-      responseGet(res, dataDecrypt)
+      const data = await Patient.find();
+      const processDecrypt = await Promise.all(
+        data.map(async (data, x) => {
+          const decrypt = await SGKMS.engineApiSGKMS(
+            `/${process.env.VERSION}/decrypt`,
+            {
+              sessionToken: process.env.SESSION_TOKEN,
+              slotId: parseInt(process.env.SLOT_ID),
+              keyId: process.env.ENCRYPT_AES,
+              keyVersion: data.keyVersion,
+              ciphertext: [
+                data.fullname,
+                data.maritalStatus,
+                data.citizenship,
+                data.gender,
+                data.religion,
+                data.mother,
+              ],
+            }
+          );
+
+          const {
+            placeBirth,
+            dateBirth,
+            address,
+            work,
+            phone,
+            numberRegristation,
+            id = data._id,
+          } = data;
+
+          return {
+            id,
+            fullname: decrypt.result.plaintext[0],
+            maritalStatus: decrypt.result.plaintext[1],
+            citizenship: decrypt.result.plaintext[2],
+            gender: decrypt.result.plaintext[3],
+            religion: decrypt.result.plaintext[4],
+            mother: decrypt.result.plaintext[5],
+            placeBirth,
+            dateBirth,
+            address,
+            work,
+            phone,
+            numberRegristation,
+          };
+        })
+      );
+      responseGet(res, processDecrypt);
     } catch (error) {
-      console.log(error)
-      responseError(res, error)
-      // console.log(error, "error decrypt")
-      // if (error.response) {
-      //   return res.status(500).json(error.response.data);
-      // }
-      // handlerError(res, error);
+      // console.log(error);
+      responseError(res, error);
+    }
+  }
+  static async getPatientEncrypt(req, res) {
+    try {
+      await Patient.find().then((result) => {
+        const data = result.map((a) => {
+          return {
+            ...a._doc,
+            id: a._id,
+            fullname: a.fullname.text,
+            maritalStatus: a.maritalStatus.text,
+            citizenship: a.citizenship.text,
+            gender: a.gender.text,
+            religion: a.religion.text,
+            mother: a.mother.text,
+          };
+        });
+        responseGet(res, data);
+      });
+    } catch (error) {
+      responseError(res, error);
     }
   }
   static async detailPatient(req, res) {
     try {
-      const data = await Patient.findOne({_id: req.params.id});
-      if(!data) return responseError(res, {message: "patient not found"})
+      const data = await Patient.findOne({ _id: req.params.id });
+      if (!data) return responseError(res, { message: "patient not found" });
       const processDecrypt = await SGKMS.engineApiSGKMS(
-        `/${process.env.VERSION}/decrypt`,{
+        `/${process.env.VERSION}/decrypt`,
+        {
           sessionToken: process.env.SESSION_TOKEN,
           slotId: parseInt(process.env.SLOT_ID),
           keyId: process.env.ENCRYPT_AES,
           keyVersion: data.keyVersion,
-          ciphertext: [{
-            text: data.fullname,
-            mac: data.mac,
-            iv: data.iv
-          }],
+          ciphertext: [
+            data.fullname,
+            data.maritalStatus,
+            data.citizenship,
+            data.gender,
+            data.religion,
+            data.mother,
+          ],
         }
-      )
-      const { _id, fullname, mac, iv, text, keyVersion, ...newData } = data._doc;
+      );
+      const {
+        _id,
+        fullname,
+        maritalStatus,
+        citizenship,
+        religion,
+        gender,
+        mother,
+        mac,
+        iv,
+        text,
+        keyVersion,
+        ...newData
+      } = data._doc;
       responseGet(res, {
         id: _id,
         fullname: processDecrypt.result.plaintext[0],
+        maritalStatus: processDecrypt.result.plaintext[1],
+        citizenship: processDecrypt.result.plaintext[2],
+        gender: processDecrypt.result.plaintext[3],
+        religion: processDecrypt.result.plaintext[4],
+        mother: processDecrypt.result.plaintext[5],
         ...newData,
       });
     } catch (error) {
@@ -125,38 +225,84 @@ class PatientController {
   }
   static async updatePatient(req, res) {
     try {
-      const { fullname, placeBirth, dateBirth, gender, address, work, phone, numberRegristation } = req.body;
-      const processEncrypt = await SGKMS.engineApiSGKMS(`/${process.env.VERSION}/encrypt`,{
-        sessionToken: process.env.SESSION_TOKEN,
-        slotId: parseInt(process.env.SLOT_ID),
-        keyId: process.env.ENCRYPT_AES,
-        plaintext: [{
-          text: fullname,
-          numberRegristation,
-        }]
-      })
-      const update = await Patient.findByIdAndUpdate(req.params.id,{
-          fullname: processEncrypt.result.ciphertext[0].text,
+      const {
+        fullname,
+        maritalStatus,
+        citizenship,
+        gender,
+        religion,
+        mother,
+        placeBirth,
+        dateBirth,
+        address,
+        work,
+        phone,
+      } = req.body;
+      const data = await Patient.findOne({ _id: req.params.id });
+      if (!data) return responseError(res, { message: "patient not found" });
+      const numberRegristation = data.numberRegristation;
+      const processEncrypt = await SGKMS.engineApiSGKMS(
+        `/${process.env.VERSION}/encrypt`,
+        {
+          sessionToken: process.env.SESSION_TOKEN,
+          slotId: parseInt(process.env.SLOT_ID),
+          keyId: process.env.ENCRYPT_AES,
+          plaintext: [
+            {
+              text: fullname,
+              numberRegristation,
+            },
+            {
+              text: maritalStatus,
+              numberRegristation,
+            },
+            {
+              text: citizenship,
+              numberRegristation,
+            },
+            {
+              text: gender,
+              numberRegristation,
+            },
+            {
+              text: religion,
+              numberRegristation,
+            },
+            {
+              text: mother,
+              numberRegristation,
+            },
+          ],
+        }
+      );
+      const update = await Patient.findByIdAndUpdate(
+        req.params.id,
+        {
+          fullname: processEncrypt.result.ciphertext[0],
+          maritalStatus: processEncrypt.result.ciphertext[1],
+          citizenship: processEncrypt.result.ciphertext[2],
+          gender: processEncrypt.result.ciphertext[3],
+          religion: processEncrypt.result.ciphertext[4],
+          mother: processEncrypt.result.ciphertext[5],
           placeBirth,
           dateBirth,
-          gender,
           address,
           work,
           phone,
           keyVersion: processEncrypt.result.keyVersion,
-          mac: processEncrypt.result.ciphertext[0].mac,
-          iv: processEncrypt.result.ciphertext[0].iv,
-      },{ new: true })
+        },
+        { new: true }
+      );
       responseUpdate(res, update ? 1 : 0);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       responseError(res, error);
     }
   }
   static async deletePatient(req, res) {
     try {
       const deletedPatient = await Patient.findByIdAndDelete(req.params.id);
-      responseDelete(res, deletedPatient ? 1 : 0 );
+      responseDelete(res, deletedPatient ? 1 : 0);
     } catch (error) {
       responseError(res, error);
     }
