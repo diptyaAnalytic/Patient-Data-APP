@@ -122,7 +122,7 @@ class UserController {
         }
       ).then(async (data) => {
         console.log("masuk", data);
-        await redis.set("session_token", data.result.sessionToken, "KEEPTTL");
+        await client.set("session_token", data.result.sessionToken, "KEEPTTL");
         process.env.SESSION_TOKEN = data.result.sessionToken;
 
         const sessionToken = await client.get("session_token");
