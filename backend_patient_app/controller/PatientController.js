@@ -7,6 +7,8 @@ const {
 } = require("../helper/Response");
 const { Patient, MedicalRecord, User } = require("../models");
 const { SGKMS } = require("../utils");
+const client = require("../config/redis");
+const sessionToken = await client.get("session_token");
 
 class PatientController {
   static async headerAmount(req, res) {
@@ -41,7 +43,7 @@ class PatientController {
       const processEncrypt = await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/encrypt`,
         {
-          sessionToken: process.env.SESSION_TOKEN,
+          sessionToken,
           slotId: parseInt(process.env.SLOT_ID),
           keyId: process.env.ENCRYPT_AES,
           plaintext: [
@@ -103,7 +105,7 @@ class PatientController {
           const decrypt = await SGKMS.engineApiSGKMS(
             `/${process.env.VERSION}/decrypt`,
             {
-              sessionToken: process.env.SESSION_TOKEN,
+              sessionToken,
               slotId: parseInt(process.env.SLOT_ID),
               keyId: process.env.ENCRYPT_AES,
               keyVersion: data.keyVersion,
@@ -185,7 +187,7 @@ class PatientController {
       const processDecrypt = await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/decrypt`,
         {
-          sessionToken: process.env.SESSION_TOKEN,
+          sessionToken,
           slotId: parseInt(process.env.SLOT_ID),
           keyId: process.env.ENCRYPT_AES,
           keyVersion: data.keyVersion,
@@ -251,7 +253,7 @@ class PatientController {
       const processEncrypt = await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/encrypt`,
         {
-          sessionToken: process.env.SESSION_TOKEN,
+          sessionToken,
           slotId: parseInt(process.env.SLOT_ID),
           keyId: process.env.ENCRYPT_AES,
           plaintext: [

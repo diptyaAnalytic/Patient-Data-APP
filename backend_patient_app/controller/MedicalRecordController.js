@@ -7,6 +7,8 @@ const {
 } = require("../helper/Response");
 const { MedicalRecord, Patient } = require("../models");
 const { SGKMS } = require("../utils");
+const client = require("../config/redis");
+const sessionToken = await client.get("session_token");
 
 class MedicalRecordController {
   static async creteMedicalRecord(req, res) {
@@ -18,7 +20,7 @@ class MedicalRecordController {
       const processSeal = await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/seal`,
         {
-          sessionToken: process.env.SESSION_TOKEN,
+          sessionToken,
           slotId: parseInt(process.env.SLOT_ID),
           keyId: process.env.SEAL_AES,
           plaintext: [diagnosis, therapy, service, description],
@@ -116,7 +118,7 @@ class MedicalRecordController {
           const processUnseal = await SGKMS.engineApiSGKMS(
             `/${process.env.VERSION}/unseal`,
             {
-              sessionToken: process.env.SESSION_TOKEN,
+              sessionToken,
               slotId: parseInt(process.env.SLOT_ID),
               ciphertext: [
                 result.diagnosis,
@@ -137,7 +139,7 @@ class MedicalRecordController {
           const decrypt = await SGKMS.engineApiSGKMS(
             `/${process.env.VERSION}/decrypt`,
             {
-              sessionToken: process.env.SESSION_TOKEN,
+              sessionToken,
               slotId: parseInt(process.env.SLOT_ID),
               keyId: process.env.ENCRYPT_AES,
               keyVersion: result.patientId.keyVersion,
@@ -232,7 +234,7 @@ class MedicalRecordController {
           const processDecrypt = await SGKMS.engineApiSGKMS(
             `/${process.env.VERSION}/decrypt`,
             {
-              sessionToken: process.env.SESSION_TOKEN,
+              sessionToken,
               slotId: parseInt(process.env.SLOT_ID),
               keyId: process.env.ENCRYPT_AES,
               keyVersion: data[0].patientId.keyVersion,
@@ -252,7 +254,7 @@ class MedicalRecordController {
               const processUnseal = await SGKMS.engineApiSGKMS(
                 `/${process.env.VERSION}/unseal`,
                 {
-                  sessionToken: process.env.SESSION_TOKEN,
+                  sessionToken,
                   slotId: parseInt(process.env.SLOT_ID),
                   ciphertext: [
                     result.diagnosis,
@@ -326,7 +328,7 @@ class MedicalRecordController {
           const processDecrypt = await SGKMS.engineApiSGKMS(
             `/${process.env.VERSION}/decrypt`,
             {
-              sessionToken: process.env.SESSION_TOKEN,
+              sessionToken,
               slotId: parseInt(process.env.SLOT_ID),
               keyId: process.env.ENCRYPT_AES,
               keyVersion,
@@ -343,7 +345,7 @@ class MedicalRecordController {
           const processUnseal = await SGKMS.engineApiSGKMS(
             `/${process.env.VERSION}/unseal`,
             {
-              sessionToken: process.env.SESSION_TOKEN,
+              sessionToken,
               slotId: parseInt(process.env.SLOT_ID),
               ciphertext: [diagnosis, therapy, description, service],
             }

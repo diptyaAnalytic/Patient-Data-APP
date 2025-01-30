@@ -1,26 +1,9 @@
 const jwt = require("jsonwebtoken");
-
 const { User } = require("../models");
 const { SGKMS } = require("../utils");
 const { responseGet, responseError } = require("../helper/Response");
 const { accessToken } = require("../helper/AccessToken");
-
-const redis = require("redis");
-
-const client = redis.createClient({
-  socket: {
-    host: "127.0.0.1", // Ganti dengan IP Redis jika tidak di localhost
-    port: 6379,
-  },
-});
-
-client.on("connect", () => {
-  console.log("Connected to Redis");
-});
-client.on("error", (err) => {
-  console.error("Redis error:", err);
-});
-client.connect();
+const client = require("../config/redis");
 
 class UserController {
   static async login(req, res) {
@@ -45,14 +28,12 @@ class UserController {
       if (!login.result.sessionToken) {
         return responseError(res, { message: "login sgkms failed!" });
       }
-      // process.env.SESSION_TOKEN = login.result.sessionToken;
-      // await client.set(
-      //   "session_token",
-      //   `${login.result.sessionToken}`,
-      //   "EX",
-      //   240 // 14400 ==> 4 jam
-      // );
-      await client.setEx("session_token", 240, `${login.result.sessionToken}`);
+      await client.set(
+        "session_token",
+        `${login.result.sessionToken}`,
+        "EX",
+        14400 // 14400 ==> 4 jam
+      );
 
       const sessionToken = await client.get("session_token");
       console.log("ngambil sessionToken dari Redis:", sessionToken);
@@ -124,7 +105,6 @@ class UserController {
       ).then(async (data) => {
         // console.log("masuk", data);
         await client.set("session_token", data.result.sessionToken, "KEEPTTL");
-        process.env.SESSION_TOKEN = data.result.sessionToken;
 
         const sessionToken = await client.get("session_token");
         console.log(
