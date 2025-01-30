@@ -7,7 +7,7 @@ const {
 } = require("../helper/Response");
 const { MedicalRecord, Patient } = require("../models");
 const { SGKMS } = require("../utils");
-const client = require("../config/redis");
+const { client, sessionToken } = require("../config/redis");
 
 class MedicalRecordController {
   static async creteMedicalRecord(req, res) {
@@ -107,19 +107,20 @@ class MedicalRecordController {
   }
   static async getRMDecrypt(req, res) {
     try {
+      return console.log(sessionToken());
       const { page, search, sorting } = req.query;
       const data = await MedicalRecord.find()
         .populate("patientId")
         .sort({ createdAt: -1 });
 
-      const sessionToken = await client.get("session_token");
+      // const sessionToken = await client.get("session_token");
       const results = await Promise.all(
         data.map(async (result) => {
           const { _id: id, date, createdAt } = result;
           const processUnseal = await SGKMS.engineApiSGKMS(
             `/${process.env.VERSION}/unseal`,
             {
-              sessionToken,
+              sessionToken: await sessionToken(),
               slotId: parseInt(process.env.SLOT_ID),
               ciphertext: [
                 result.diagnosis,

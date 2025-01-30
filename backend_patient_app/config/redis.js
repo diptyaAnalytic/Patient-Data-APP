@@ -1,12 +1,11 @@
 require("dotenv").config();
 const redis = require("redis");
 
-
 const client = redis.createClient({
   socket: {
     host: "127.0.0.1",
-    port: 6379,
-    password: "sandhiguna",
+    port: process.env.PORT_REDIS,
+    password: process.env.PASSWORD_REDIS,
   },
 });
 
@@ -18,4 +17,9 @@ client.on("error", (err) => {
 });
 client.connect();
 
-module.exports = client;
+const sessionToken =  async () => {
+  const sessionToken = await client.get("session_token");
+  return sessionToken
+}
+
+module.exports = { client, sessionToken };
