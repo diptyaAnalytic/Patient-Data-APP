@@ -107,7 +107,7 @@ class MedicalRecordController {
   }
   static async getRMDecrypt(req, res) {
     try {
-      return console.log(sessionToken());
+      return console.log(await sessionToken());
       const { page, search, sorting } = req.query;
       const data = await MedicalRecord.find()
         .populate("patientId")
