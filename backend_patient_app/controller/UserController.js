@@ -117,7 +117,7 @@ class UserController {
       await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/agent/refreshSession`,
         {
-          sessionToken: process.env.SESSION_TOKEN,
+          sessionToken: await client.get("session_token"),
           slotId: parseInt(process.env.SLOT_ID),
         }
       ).then(async (data) => {
