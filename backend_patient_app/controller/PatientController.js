@@ -42,6 +42,8 @@ class PatientController {
         phone,
         numberRegristation = Date.now(),
       } = req.body;
+      const oke = {sessionToken}
+      return console.log(oke)
       //use encrypt aes, so need aad or more data to encrypt data to encrypt
       const processEncrypt = await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/encrypt`,
