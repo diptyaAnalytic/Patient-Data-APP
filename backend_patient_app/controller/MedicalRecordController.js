@@ -7,7 +7,8 @@ const {
 } = require("../helper/Response");
 const { MedicalRecord, Patient } = require("../models");
 const { SGKMS } = require("../utils");
-const { client, sessionToken } = require("../config/redis");
+const { sessionToken } = require("../config/redis");
+
 
 class MedicalRecordController {
   static async creteMedicalRecord(req, res) {
@@ -16,11 +17,10 @@ class MedicalRecordController {
         req.body;
       const data = await Patient.findOne({ _id: patientId });
       if (!data) return responseError(res, { message: "patient not found" });
-      const sessionToken = await client.get("session_token");
       const processSeal = await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/seal`,
         {
-          sessionToken,
+          sessionToken: await sessionToken(),
           slotId: parseInt(process.env.SLOT_ID),
           keyId: process.env.SEAL_AES,
           plaintext: [diagnosis, therapy, service, description],
@@ -107,13 +107,11 @@ class MedicalRecordController {
   }
   static async getRMDecrypt(req, res) {
     try {
-      return console.log(await sessionToken());
       const { page, search, sorting } = req.query;
       const data = await MedicalRecord.find()
         .populate("patientId")
         .sort({ createdAt: -1 });
 
-      // const sessionToken = await client.get("session_token");
       const results = await Promise.all(
         data.map(async (result) => {
           const { _id: id, date, createdAt } = result;
@@ -141,7 +139,7 @@ class MedicalRecordController {
           const decrypt = await SGKMS.engineApiSGKMS(
             `/${process.env.VERSION}/decrypt`,
             {
-              sessionToken,
+              sessionToken: await sessionToken(),
               slotId: parseInt(process.env.SLOT_ID),
               keyId: process.env.ENCRYPT_AES,
               keyVersion: result.patientId.keyVersion,
@@ -228,7 +226,6 @@ class MedicalRecordController {
     try {
       const data = await Patient.findOne({ _id: req.params.id });
       if (!data) return responseError(res, { message: "patient not found" });
-      const sessionToken = await client.get("session_token");
       await MedicalRecord.find({ patientId: req.params.id })
         .populate("patientId")
         .sort({ createdAt: -1 })
@@ -237,7 +234,7 @@ class MedicalRecordController {
           const processDecrypt = await SGKMS.engineApiSGKMS(
             `/${process.env.VERSION}/decrypt`,
             {
-              sessionToken,
+              sessionToken: await sessionToken(),
               slotId: parseInt(process.env.SLOT_ID),
               keyId: process.env.ENCRYPT_AES,
               keyVersion: data[0].patientId.keyVersion,
@@ -257,7 +254,7 @@ class MedicalRecordController {
               const processUnseal = await SGKMS.engineApiSGKMS(
                 `/${process.env.VERSION}/unseal`,
                 {
-                  sessionToken,
+                  sessionToken: await sessionToken(),
                   slotId: parseInt(process.env.SLOT_ID),
                   ciphertext: [
                     result.diagnosis,
@@ -299,7 +296,6 @@ class MedicalRecordController {
   }
   static async getDetailRM(req, res) {
     try {
-      const sessionToken = await client.get("session_token");
       await MedicalRecord.findOne({ _id: req.params.id })
         .populate("patientId")
         .then(async (result) => {
@@ -332,7 +328,7 @@ class MedicalRecordController {
           const processDecrypt = await SGKMS.engineApiSGKMS(
             `/${process.env.VERSION}/decrypt`,
             {
-              sessionToken,
+              sessionToken: await sessionToken(),
               slotId: parseInt(process.env.SLOT_ID),
               keyId: process.env.ENCRYPT_AES,
               keyVersion,
@@ -349,7 +345,7 @@ class MedicalRecordController {
           const processUnseal = await SGKMS.engineApiSGKMS(
             `/${process.env.VERSION}/unseal`,
             {
-              sessionToken,
+              sessionToken: await sessionToken(),
               slotId: parseInt(process.env.SLOT_ID),
               ciphertext: [diagnosis, therapy, description, service],
             }

@@ -3,7 +3,7 @@ const { User } = require("../models");
 const { SGKMS } = require("../utils");
 const { responseGet, responseError } = require("../helper/Response");
 const { accessToken } = require("../helper/AccessToken");
-const {client} = require("../config/redis");
+const {client, sessionToken} = require("../config/redis");
 
 class UserController {
   static async login(req, res) {
@@ -99,7 +99,7 @@ class UserController {
       await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/agent/refreshSession`,
         {
-          sessionToken: await client.get("session_token"),
+          sessionToken: await sessionToken(),
           slotId: parseInt(process.env.SLOT_ID),
         }
       ).then(async (data) => {
@@ -126,7 +126,7 @@ class UserController {
 }
 
 setInterval(async () => {
-  if (await client.get("session_token")) {
+  if (await sessionToken()) {
     UserController.refreshToken();
   }
 }, 300000); //5 menit

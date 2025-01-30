@@ -7,11 +7,7 @@ const {
 } = require("../helper/Response");
 const { Patient, MedicalRecord, User } = require("../models");
 const { SGKMS } = require("../utils");
-const client = require("../config/redis");
-// const sessionToken =  async () => {
-//   const sessionToken = await client.get("session_token");
-//   return sessionToken
-// }
+const { sessionToken} = require("../config/redis");
 
 class PatientController {
   static async headerAmount(req, res) {
@@ -42,12 +38,11 @@ class PatientController {
         phone,
         numberRegristation = Date.now(),
       } = req.body;
-      const sessionToken = await client.get("session_token");
       //use encrypt aes, so need aad or more data to encrypt data to encrypt
       const processEncrypt = await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/encrypt`,
         {
-          sessionToken,
+          sessionToken: await sessionToken(),
           slotId: parseInt(process.env.SLOT_ID),
           keyId: process.env.ENCRYPT_AES,
           plaintext: [
@@ -104,13 +99,12 @@ class PatientController {
     try {
       const { search } = req.query;
       const data = await Patient.find();
-      const sessionToken = await client.get("session_token");
       const processDecrypt = await Promise.all(
         data.map(async (data, x) => {
           const decrypt = await SGKMS.engineApiSGKMS(
             `/${process.env.VERSION}/decrypt`,
             {
-              sessionToken,
+              sessionToken: await sessionToken(),
               slotId: parseInt(process.env.SLOT_ID),
               keyId: process.env.ENCRYPT_AES,
               keyVersion: data.keyVersion,
@@ -189,11 +183,10 @@ class PatientController {
     try {
       const data = await Patient.findOne({ _id: req.params.id });
       if (!data) return responseError(res, { message: "patient not found" });
-      const sessionToken = await client.get("session_token");
       const processDecrypt = await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/decrypt`,
         {
-          sessionToken,
+          sessionToken: await sessionToken(),
           slotId: parseInt(process.env.SLOT_ID),
           keyId: process.env.ENCRYPT_AES,
           keyVersion: data.keyVersion,
@@ -256,11 +249,10 @@ class PatientController {
       const data = await Patient.findOne({ _id: req.params.id });
       if (!data) return responseError(res, { message: "patient not found" });
       const numberRegristation = data.numberRegristation;
-      const sessionToken = await client.get("session_token");
       const processEncrypt = await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/encrypt`,
         {
-          sessionToken,
+          sessionToken: await sessionToken(),
           slotId: parseInt(process.env.SLOT_ID),
           keyId: process.env.ENCRYPT_AES,
           plaintext: [
