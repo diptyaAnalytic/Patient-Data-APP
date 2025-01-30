@@ -8,10 +8,6 @@ const {
 const { MedicalRecord, Patient } = require("../models");
 const { SGKMS } = require("../utils");
 const client = require("../config/redis");
-const sessionToken =  async () => {
-  const sessionToken = await client.get("session_token");
-  return sessionToken
-}
 
 class MedicalRecordController {
   static async creteMedicalRecord(req, res) {
@@ -20,6 +16,7 @@ class MedicalRecordController {
         req.body;
       const data = await Patient.findOne({ _id: patientId });
       if (!data) return responseError(res, { message: "patient not found" });
+      const sessionToken = await client.get("session_token");
       const processSeal = await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/seal`,
         {
@@ -115,6 +112,7 @@ class MedicalRecordController {
         .populate("patientId")
         .sort({ createdAt: -1 });
 
+      const sessionToken = await client.get("session_token");
       const results = await Promise.all(
         data.map(async (result) => {
           const { _id: id, date, createdAt } = result;
@@ -229,6 +227,7 @@ class MedicalRecordController {
     try {
       const data = await Patient.findOne({ _id: req.params.id });
       if (!data) return responseError(res, { message: "patient not found" });
+      const sessionToken = await client.get("session_token");
       await MedicalRecord.find({ patientId: req.params.id })
         .populate("patientId")
         .sort({ createdAt: -1 })
@@ -299,6 +298,7 @@ class MedicalRecordController {
   }
   static async getDetailRM(req, res) {
     try {
+      const sessionToken = await client.get("session_token");
       await MedicalRecord.findOne({ _id: req.params.id })
         .populate("patientId")
         .then(async (result) => {
