@@ -8,7 +8,10 @@ const {
 const { Patient, MedicalRecord, User } = require("../models");
 const { SGKMS } = require("../utils");
 const client = require("../config/redis");
-const sessionToken = await client.get("session_token");
+const sessionToken =  async () => {
+  const sessionToken = await client.get("session_token");
+  return sessionToken
+}
 
 class PatientController {
   static async headerAmount(req, res) {

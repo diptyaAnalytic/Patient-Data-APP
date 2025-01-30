@@ -8,7 +8,10 @@ const {
 const { MedicalRecord, Patient } = require("../models");
 const { SGKMS } = require("../utils");
 const client = require("../config/redis");
-const sessionToken = await client.get("session_token");
+const sessionToken =  async () => {
+  const sessionToken = await client.get("session_token");
+  return sessionToken
+}
 
 class MedicalRecordController {
   static async creteMedicalRecord(req, res) {
