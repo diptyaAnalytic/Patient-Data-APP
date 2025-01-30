@@ -3,7 +3,7 @@ const { User } = require("../models");
 const { SGKMS } = require("../utils");
 const { responseGet, responseError } = require("../helper/Response");
 const { accessToken } = require("../helper/AccessToken");
-const client = require("../config/redis");
+const {client} = require("../config/redis");
 
 class UserController {
   static async login(req, res) {
