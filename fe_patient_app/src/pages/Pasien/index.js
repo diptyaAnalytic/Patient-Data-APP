@@ -193,7 +193,7 @@ export default function Pasien() {
                   <BiSearch className="absolute left-[14px] top-[10px] text-[#A8A8A8] text-lg" />
                   <input
                     onChange={handleSearchName}
-                    placeholder="Search by Name or Phone..."
+                    placeholder="Search by Fullname..."
                     className="h-[38px] text-[#A8A8A8] text-[10px] font-[500] pl-12 border rounded-[12px] py-2 w-full lg:w-[300px]"
                   />
                 </div>

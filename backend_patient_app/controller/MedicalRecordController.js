@@ -174,6 +174,12 @@ class MedicalRecordController {
           };
         })
       );
+      if (search) {
+        const data = results.filter((item) =>
+          item.fullname.toLowerCase().includes(search.toLowerCase())
+        );
+        return responseGetPaginator(res, paginator(data, page ? page : 1, 20));
+      }
       responseGetPaginator(res, paginator(results, page ? page : 1, 20));
       // return res.send(result)
     } catch (error) {

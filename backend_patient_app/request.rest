@@ -17,7 +17,7 @@ Content-Type: application/json
 ### Menampilkan data fetch
 GET http://localhost:5003/fetch
 Authorization: Bearer {{token}}
-Content-Type: application/json
+Content-Type: application/json  
 
 ### Menampilkan data header
 GET http://localhost:5003/header
@@ -50,7 +50,7 @@ Content-Type: application/json
 }
 
 ### Menampilkan data pasien
-GET http://localhost:5003/patient
+GET http://localhost:5003/patient?search=us
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -124,6 +124,6 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 ### get medical record Decrypt
-get http://localhost:5003/decrypt/rekam-medis
+get http://localhost:5003/decrypt/rekam-medis?search=sip
 Authorization: Bearer {{token}}
 Content-Type: application/json

@@ -109,12 +109,12 @@ export default function RekamMedis() {
   const debouncedSearchName = debounce(async (name) => {
     if (params.state === null) {
       try {
-        const response = await Api.GetRekamMedis(
+        const response = await Api.GetRekamMedisDecrypt(
           localStorage.getItem("token"),
           name,
           currentPage
         );
-        setDataRekamMedis(response.data.data);
+        setDataRekamMedisDecrypt(response.data.data);
         setDataServiceRekamMedis(response.data.data.service);
       } catch (error) {
         console.log(error);
@@ -440,7 +440,7 @@ export default function RekamMedis() {
                     <BiSearch className="absolute left-[14px] top-[10px] text-[#A8A8A8] text-lg" />
                     <input
                       onChange={handleSearchName}
-                      placeholder="Search by No Medical Record or Name..."
+                      placeholder="Search by Fullname..."
                       className="h-[38px] text-[#A8A8A8] text-[10px] font-[500] pl-12 border rounded-[12px] py-2 w-full lg:w-[300px]"
                     />
                   </div>
@@ -471,6 +471,9 @@ export default function RekamMedis() {
                         Patient Code
                       </th>
                       <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Fullname
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
                         Diagnosis
                       </th>
                       <th className="px-4 py-2 text-left text-xs font-semibold text-black">
@@ -498,8 +501,11 @@ export default function RekamMedis() {
                         <td className="px-4 py-2 text-xs text-[#737373] font-medium">
                           {moment(item.createdAt).format("DD MMMM YYYY")}
                         </td>
-                        <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate max-w-[200px]">
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate">
                           {item.numberRegristation}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate">
+                          {item.fullname}
                         </td>
                         <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate max-w-[200px]">
                           {item.diagnosis}
@@ -576,6 +582,9 @@ export default function RekamMedis() {
                         Patient Code
                       </th>
                       <th className="px-4 py-2 text-left text-xs font-semibold text-black">
+                        Fullname
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-black">
                         Diagnosis
                       </th>
                       <th className="px-4 py-2 text-left text-xs font-semibold text-black">
@@ -602,6 +611,9 @@ export default function RekamMedis() {
                         </td>
                         <td className="px-4 py-2 text-xs text-[#737373] font-medium">
                           {item.numberRegristation}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-[#737373] font-medium">
+                          {item.fullname}
                         </td>
                         <td className="px-4 py-2 text-xs text-[#737373] font-medium truncate max-w-[200px]">
                           {item.diagnosis}

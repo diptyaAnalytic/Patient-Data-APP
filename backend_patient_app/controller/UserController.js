@@ -7,7 +7,6 @@ const { accessToken } = require("../helper/AccessToken");
 
 const redis = require("redis");
 
-// Buat client Redis
 const client = redis.createClient({
   socket: {
     host: "127.0.0.1", // Ganti dengan IP Redis jika tidak di localhost
@@ -15,16 +14,12 @@ const client = redis.createClient({
   },
 });
 
-// Event handler untuk koneksi
 client.on("connect", () => {
   console.log("Connected to Redis");
 });
-
 client.on("error", (err) => {
   console.error("Redis error:", err);
 });
-
-// Koneksikan client Redis
 client.connect();
 
 class UserController {
@@ -50,12 +45,16 @@ class UserController {
       if (!login.result.sessionToken) {
         return responseError(res, { message: "login sgkms failed!" });
       }
-      process.env.SESSION_TOKEN = login.result.sessionToken;
-      await client.set("session_token", `${login.result.sessionToken}`);
+      // process.env.SESSION_TOKEN = login.result.sessionToken;
+      await client.set(
+        "session_token",
+        `${login.result.sessionToken}`,
+        "EX",
+        14400 //4 jam
+      );
 
       const sessionToken = await client.get("session_token");
-      console.log("sessionToken dari Redis:", sessionToken);
-      // console.log(process.env.SESSION_TOKEN);
+      console.log("ngambil sessionToken dari Redis:", sessionToken);
       const randomNumbers = await SGKMS.engineApiSGKMS(
         `/${process.env.VERSION}/rng`,
         {
@@ -121,14 +120,34 @@ class UserController {
           sessionToken: process.env.SESSION_TOKEN,
           slotId: parseInt(process.env.SLOT_ID),
         }
-      ).then((data) => {
+      ).then(async (data) => {
         console.log("masuk", data);
+        await redis.set("session_token", data.result.sessionToken, "KEEPTTL");
         process.env.SESSION_TOKEN = data.result.sessionToken;
+
+        const sessionToken = await client.get("session_token");
+        console.log(
+          "sessionToken Redis diperbarui dari refreshSession:",
+          sessionToken
+        );
       });
     } catch (error) {
       console.log("error refresh token", error);
     }
   }
+  static async logout(req, res) {
+    try {
+      await redis.del(sessionToken);
+    } catch (error) {
+      responseError(res, error);
+    }
+  }
 }
+
+setInterval(async () => {
+  if (await client.get("session_token")) {
+    UserController.refreshToken();
+  }
+}, 300000); //5 menit
 
 module.exports = UserController;

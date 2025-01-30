@@ -96,6 +96,7 @@ class PatientController {
   }
   static async getPatient(req, res) {
     try {
+      const {search} = req.query
       const data = await Patient.find();
       const processDecrypt = await Promise.all(
         data.map(async (data, x) => {
@@ -144,6 +145,12 @@ class PatientController {
           };
         })
       );
+      if(search){
+         const data = processDecrypt.filter((item) =>
+           item.fullname.toLowerCase().includes(search.toLowerCase())
+         );
+         return responseGet(res, data);
+      }
       responseGet(res, processDecrypt);
     } catch (error) {
       // console.log(error);
