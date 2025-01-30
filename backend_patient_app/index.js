@@ -6,7 +6,6 @@ const cors = require("cors");
 const apiRoutes = require('./routes/router');
 const{User} = require('./models')
 const { createAdmin } = require("./seeders/AdminSeeders.js");
-const UserController = require("./controller/UserController.js");
 const app = express();
 app.use(express.json());
 
