@@ -50,7 +50,7 @@ class UserController {
         "session_token",
         `${login.result.sessionToken}`,
         "EX",
-        14400 //4 jam
+        240 // 14400 ==> 4 jam
       );
 
       const sessionToken = await client.get("session_token");
@@ -121,7 +121,7 @@ class UserController {
           slotId: parseInt(process.env.SLOT_ID),
         }
       ).then(async (data) => {
-        console.log("masuk", data);
+        // console.log("masuk", data);
         await client.set("session_token", data.result.sessionToken, "KEEPTTL");
         process.env.SESSION_TOKEN = data.result.sessionToken;
 
