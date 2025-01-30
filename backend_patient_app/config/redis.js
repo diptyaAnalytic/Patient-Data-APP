@@ -2,6 +2,7 @@ require("dotenv").config();
 const redis = require("redis");
 
 console.log(process.env.PASSWORD_REDIS);
+console.log(process.env.PORT_REDIS);
 
 const client = redis.createClient({
   socket: {
