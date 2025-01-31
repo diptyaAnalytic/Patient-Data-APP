@@ -28,12 +28,12 @@ class UserController {
       if (!login.result.sessionToken) {
         return responseError(res, { message: "login sgkms failed!" });
       }
-      await client.set(
+      await client.setEx(
         "session_token",
-        `${login.result.sessionToken}`,
-        "EX",
-        14400 // 14400 ==> 4 jam
+        14400, // 14400 ==> 4 jam
+        `${login.result.sessionToken}`
       );
+
 
       const sessionToken = await client.get("session_token");
       console.log("ngambil sessionToken dari Redis:", sessionToken);
